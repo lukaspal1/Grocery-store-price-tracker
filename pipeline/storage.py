@@ -34,6 +34,26 @@ CREATE TABLE IF NOT EXISTS price_history (
 
 CREATE INDEX IF NOT EXISTS idx_history_lookup
     ON price_history (store, product_id, recorded_at);
+
+CREATE TABLE IF NOT EXISTS product_matches (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    canonical_key TEXT NOT NULL,
+    store_a TEXT NOT NULL,
+    product_id_a TEXT NOT NULL,
+    store_b TEXT NOT NULL,
+    product_id_b TEXT NOT NULL,
+    score REAL NOT NULL,
+    brand_score REAL,
+    quantity_score REAL,
+    name_score REAL,
+    created_at TEXT NOT NULL,
+    UNIQUE (store_a, product_id_a, store_b, product_id_b)
+);
+
+CREATE INDEX IF NOT EXISTS idx_matches_canonical
+    ON product_matches (canonical_key);
+CREATE INDEX IF NOT EXISTS idx_matches_pair
+    ON product_matches (store_a, product_id_a);
 """
 
 
@@ -140,3 +160,33 @@ def save_prices(conn, records):
 
     conn.commit()
     return {"upserted": upserted, "history_added": history_added}
+
+def save_matches(conn, matches):
+    """
+    matches: list of dicts with keys:
+      canonical_key, store_a, product_id_a, store_b, product_id_b,
+      score, brand_score, quantity_score, name_score
+    """
+    now = datetime.utcnow().isoformat()
+    cur = conn.cursor()
+    inserted = 0
+    for m in matches:
+        cur.execute(
+            """INSERT OR REPLACE INTO product_matches
+               (canonical_key, store_a, product_id_a, store_b, product_id_b,
+                score, brand_score, quantity_score, name_score, created_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                m["canonical_key"],
+                m["store_a"], m["product_id_a"],
+                m["store_b"], m["product_id_b"],
+                m["score"],
+                m.get("brand_score"),
+                m.get("quantity_score"),
+                m.get("name_score"),
+                now,
+            ),
+        )
+        inserted += 1
+    conn.commit()
+    return inserted

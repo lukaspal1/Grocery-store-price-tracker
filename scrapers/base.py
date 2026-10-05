@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 
 class CompliantScraper:
-    USER_AGENT = "PortfolioPriceTracker/1.0 (+https://github.com/yourname)"
+    USER_AGENT = "PortfolioPriceTracker/1.0 (+https://github.com/lukaspal1)"
     DELAY_SECONDS = 2.0
 
     def __init__(self, base_url: str):
@@ -57,12 +57,12 @@ class CompliantScraper:
             log.warning(f"robots.txt disallows: {url}")
         return allowed
 
-    def get(self, url: str):
+    def get(self, url: str, **kwargs):
         if not self.can_fetch(url):
             return None
         time.sleep(self.DELAY_SECONDS)
         try:
-            r = self.client.get(url)
+            r = self.client.get(url, **kwargs)
             r.raise_for_status()
             return r
         except httpx.HTTPError as e:
