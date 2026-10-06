@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS current_prices (
     promo_ends TEXT,
     in_stock INTEGER,
     source_url TEXT,
+    category_hint TEXT,
     updated_at TEXT NOT NULL,
     PRIMARY KEY (store, product_id)
 );
@@ -85,50 +86,53 @@ def save_prices(conn, records):
     cur = conn.cursor()
     history_added = 0
     upserted = 0
+    
 
     for r in records:
         row = {
-            "store": r["store"],
-            "product_id": str(r["product_id"]),
-            "name": r.get("name"),
-            "brand": r.get("brand"),
-            "price": r.get("price"),
-            "unit_price": r.get("unit_price"),
-            "unit": r.get("unit"),
-            "original_price": r.get("original_price"),
-            "is_on_sale": int(bool(r.get("is_on_sale"))),
-            "discount_pct": r.get("discount_pct") or 0,
-            "promo_ends": r.get("promo_ends"),
-            "in_stock": int(bool(r.get("in_stock"))),
-            "source_url": r.get("source_url"),
-            "updated_at": now,
-        }
+        "store": r["store"],
+        "product_id": str(r["product_id"]),
+        "name": r.get("name"),
+        "brand": r.get("brand"),
+        "price": r.get("price"),
+        "unit_price": r.get("unit_price"),
+        "unit": r.get("unit"),
+        "original_price": r.get("original_price"),
+        "is_on_sale": int(bool(r.get("is_on_sale"))),
+        "discount_pct": r.get("discount_pct") or 0,
+        "promo_ends": r.get("promo_ends"),
+        "in_stock": int(bool(r.get("in_stock"))),
+        "source_url": r.get("source_url"),
+        "category_hint": r.get("category_hint"),  # NEW
+        "updated_at": now,
+    }
 
         # 1. Upsert into current_prices
         cur.execute(
-            """INSERT INTO current_prices
-               (store, product_id, name, brand, price, unit_price, unit,
-                original_price, is_on_sale, discount_pct, promo_ends,
-                in_stock, source_url, updated_at)
-               VALUES (:store, :product_id, :name, :brand, :price, :unit_price, :unit,
-                       :original_price, :is_on_sale, :discount_pct, :promo_ends,
-                       :in_stock, :source_url, :updated_at)
-               ON CONFLICT(store, product_id) DO UPDATE SET
-                   name = excluded.name,
-                   brand = excluded.brand,
-                   price = excluded.price,
-                   unit_price = excluded.unit_price,
-                   unit = excluded.unit,
-                   original_price = excluded.original_price,
-                   is_on_sale = excluded.is_on_sale,
-                   discount_pct = excluded.discount_pct,
-                   promo_ends = excluded.promo_ends,
-                   in_stock = excluded.in_stock,
-                   source_url = excluded.source_url,
-                   updated_at = excluded.updated_at
-            """,
-            row,
-        )
+        """INSERT INTO current_prices
+        (store, product_id, name, brand, price, unit_price, unit,
+            original_price, is_on_sale, discount_pct, promo_ends,
+            in_stock, source_url, category_hint, updated_at)
+        VALUES (:store, :product_id, :name, :brand, :price, :unit_price, :unit,
+                :original_price, :is_on_sale, :discount_pct, :promo_ends,
+                :in_stock, :source_url, :category_hint, :updated_at)
+        ON CONFLICT(store, product_id) DO UPDATE SET
+            name = excluded.name,
+            brand = excluded.brand,
+            price = excluded.price,
+            unit_price = excluded.unit_price,
+            unit = excluded.unit,
+            original_price = excluded.original_price,
+            is_on_sale = excluded.is_on_sale,
+            discount_pct = excluded.discount_pct,
+            promo_ends = excluded.promo_ends,
+            in_stock = excluded.in_stock,
+            source_url = excluded.source_url,
+            category_hint = excluded.category_hint,
+            updated_at = excluded.updated_at
+        """,
+        row,
+    )
         upserted += 1
 
         # 2. Append to price_history only if price or discount state changed

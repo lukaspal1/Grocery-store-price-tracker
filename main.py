@@ -3,6 +3,10 @@ import logging
 from scrapers.rohlik import RohlikScraper
 from scrapers.kosik import KosikScraper
 from pipeline.storage import init_db, save_prices
+from scrapers.rohlik import RohlikScraper
+from scrapers.kosik import KosikScraper
+from scrapers.lidl import LidlScraper  # NEW
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -13,6 +17,7 @@ log = logging.getLogger(__name__)
 SCRAPERS = [
     RohlikScraper,
     KosikScraper,
+    LidlScraper,
 ]
 
 

@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Data — do not commit scraped data
+data/prices.db
+data/*.db
+
+# Logs
+logs/
+*.log
+
+# Environment / secrets
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Scratch / debug files
+flyer.json
+page_*.png
+test_lidl.py
+test_lidl_api.py
+inspect_lidl.py
+probe_lidl.py
+probe_ocr.py

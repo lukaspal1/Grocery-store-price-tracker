@@ -10,9 +10,9 @@ from rapidfuzz import fuzz
 
 log = logging.getLogger(__name__)
 
-WEIGHT_BRAND = 0.45
-WEIGHT_QUANTITY = 0.25
-WEIGHT_NAME = 0.30
+WEIGHT_BRAND = 0.30
+WEIGHT_QUANTITY = 0.20
+WEIGHT_NAME = 0.50
 MIN_MATCH_SCORE = 0.80
 
 # Words we strip before fuzzy comparison — they vary between stores
@@ -26,24 +26,17 @@ NOISE_PATTERNS = [
 # unsalted one, no matter how similar the rest of the name is.
 
 ONE_SIDED_KEYWORDS = [
-    "bio",
-    "high protein",
-    "bez laktózy",
-    "bezlaktóz",
-    "slané",
-    "neslané",
-    "kefírové",
-    "acidofilní",
-    "zakysan",
-    "farmářsk",
-    "ovesné",
-    "sojové",
-    "mandlové",
-    "kokosové",
-    "rýžové",
-    "plnotučn",
-    "polotučn",
-    "nízkotučn",
+    # existing ones...
+    "bio", "high protein", "bez laktózy", "bezlaktóz", "slané", "neslané",
+    "kefírové", "acidofilní", "zakysan", "farmářsk", "ovesné", "sojové",
+    "mandlové", "kokosové", "rýžové", "plnotučn", "polotučn", "nízkotučn",
+    # NEW — meat cuts
+    "stehna", "stehno", "prsní", "řízky", "křídla", "křídlo", "čtvrtky",
+    "kotleta", "kýta", "plec", "žebírka", "šunka", "slanina",
+    # NEW — rice/variety
+    "basmati", "jasmín", "parboiled", "dlouhozrnn", "loupan",
+    # NEW — dairy types
+    "smetan", "zakysan", "bílý", "ovocný",
 ]
 
 
