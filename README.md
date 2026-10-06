@@ -13,33 +13,27 @@ An ETL pipeline that scrapes current prices from major Czech online grocers, mat
 - **Runs on a schedule** and accumulates price history over time
 
 ## Architecture
-Scrapers (per-store)
-├── rohlik.py Playwright + page.request (Cloudflare-protected)
-├── kosik.py httpx + JSON API (no protection)
-└── lidl.py httpx + Lidl Plus API (no protection)
-↓
-Compliance layer (base.py)
-├── robots.txt parsing via httpx
-├── rate limiting between requests
-├── honest User-Agent with contact info
-└── structured logging
-↓
-Storage (SQLite)
-├── current_prices one row per product per store (upsert)
-├── price_history appended only when price/discount changes
-└── product_matches cross-store matches with confidence scores
-↓
-Matcher
-├── brand similarity (45%)
-├── quantity similarity (25%)
-├── fuzzy name similarity (30%)
-└── hard vetos: fat %, shelf-life, one-sided keywords
-↓
-Dashboard (Streamlit)
-├── cross-store comparison with per-pair savings
-├── browse all products with filters
-├── top discounts right now
-└── price history line charts
+
+```
+Scrapers        →  Compliance       →  Storage       →  Matcher          →  Dashboard
+(per-store)        (base.py)           (SQLite)         (rule-based)        (Streamlit)
+
+rohlik.py          robots.txt          current_prices   brand 45%           comparison
+kosik.py           rate limiting       price_history    quantity 25%        browse
+lidl.py            User-Agent          product_matches  name 30%            discounts
+                   logging                              vetos               history
+```
+
+
+### Layers
+
+| Layer | Responsibility | Key files |
+|---|---|---|
+| **Scrapers** | Fetch data from each store using the technique the store requires | `scrapers/` |
+| **Compliance** | robots.txt, rate limiting, honest User-Agent, structured logging | `scrapers/base.py` |
+| **Storage** | Two-table SQLite design with change detection | `pipeline/storage.py` |
+| **Matcher** | Cross-store product matching with confidence scores and per-category vetos | `pipeline/matcher.py` |
+| **Dashboard** | Streamlit UI for comparison, browsing, and history | `dashboard/app.py` |
 
 ## Stores covered
 
